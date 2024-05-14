@@ -1,31 +1,37 @@
 #!/usr/bin/env python3
-"""Least Recently Used caching module.
+""" Use the _ or gettext function to parametrize your templates.
 """
-from collections import OrderedDict
+from flask import Flask, render_template, request
+from flask_babel import Babel
 
-from base_caching import BaseCaching
 
-
-class LRUCache(BaseCaching):
-    """Represents an object that allows storing and
-    retrieving items from a dictionary with a LRU
-    removal mechanism when the limit is reached.
+class Config:
+    """The configuration class for babel
     """
-    def __init__(self):
-        """Initializes the cache.
-        """
-        super().__init__()
-        self.cache_data = OrderedDict()
+    LANGUAGES = ['en', 'fr']
+    BABEL_DEFAULT_LOCALE = 'fr'
+    BABEL_DEFAULT_TIMEZONE = 'UTC'
 
-    def put(self, key, item):
-        """Adds an item in the cache.
-        """
-        if key is None or item is None:
-            return
-        if key not in self.cache_data:
-            if len(self.cache_data) + 1 > BaseCaching.MAX_ITEMS:
-                lru_key, _ = self.cache_data.popitem(True)
-                print("DISCARD:", lru_key)
+
+app = Flask(__name__)
+app.config.from_object(Config)
+babel = Babel(app)
+
+
+@babel.localeselector
+def get_locale():
+    """Return best match"""
+    return request.accept_languages.best_match(app.config['LANGUAGES'])
+
+
+@app.route('/')
+def index():
+    """Return home page template"""
+    return render_template('3-index.html')
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
             self.cache_data[key] = item
             self.cache_data.move_to_end(key, last=False)
         else:
