@@ -1,31 +1,38 @@
 #!/usr/bin/env python3
-"""Most Recently Used caching module.
-"""
-from collections import OrderedDict
-
-from base_caching import BaseCaching
+""" doc doc doc """
+from flask import Flask, render_template, request
+from flask_babel import Babel
 
 
-class MRUCache(BaseCaching):
-    """Represents an object that allows storing and
-    retrieving items from a dictionary with an MRU
-    removal mechanism when the limit is reached.
-    """
-    def __init__(self):
-        """Initializes the cache.
-        """
-        super().__init__()
-        self.cache_data = OrderedDict()
+class Config(object):
+    """doc doc doc"""
 
-    def put(self, key, item):
-        """Adds an item in the cache.
-        """
-        if key is None or item is None:
-            return
-        if key not in self.cache_data:
-            if len(self.cache_data) + 1 > BaseCaching.MAX_ITEMS:
-                mru_key, _ = self.cache_data.popitem(False)
-                print("DISCARD:", mru_key)
+    LANGUAGES = ["en", "fr"]
+    BABEL_DEFAULT_LOCALE = "en"
+    BABEL_DEFAULT_TIMEZONE = "UTC"
+
+
+app = Flask(__name__)
+app.config.from_object(Config)
+babel = Babel(app)
+
+
+@babel.localeselector
+def get_locale():
+    """ Return the locale pass in the grument """
+    if request.args.get("locale") in app.config["LANGUAGES"]:
+        return request.args.get("locale")
+    return request.accept_languages.best_match(app.config["LANGUAGES"])
+
+
+@app.route("/")
+def index():
+    """doc doc doc"""
+    return render_template("4-index.html")
+
+
+if __name__ == "__main__":
+    app.run()
             self.cache_data[key] = item
             self.cache_data.move_to_end(key, last=False)
         else:
